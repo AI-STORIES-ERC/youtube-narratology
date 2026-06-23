@@ -21,8 +21,7 @@ What it does:
 - also stores the text of comments that mention the AI keywords:
     ai_comment_texts
 
-AI comment words counted:
-    AI, clanker, slop, chatGPT, fake, bot
+AI comment words counted are in AI_COMMENT_WORDS
 """
 
 import argparse
@@ -40,8 +39,12 @@ BASE_DIR = Path(__file__).resolve().parent
 NOTES_PATH = BASE_DIR / "notes.json"
 BACKUP_DIR = BASE_DIR / "backedup_notes"
 
-COMMENT_SCAN_LIMIT = 15000
-AI_COMMENT_WORDS = ["ai", "clanker", "slop", "chatgpt", "fake", "bot"]
+COMMENT_SCAN_LIMIT = 15000 #big number, reduce if you need to save tokens
+AI_COMMENT_WORDS = ["ai", "clanker", "slop", "chatgpt", "fake", "bot",
+                    "sora", "nanobanana", "pika", "openai", "luma", "runway",
+                    "kling", "llm", "copilot", "gemini", "anthropic", "claude",
+                    "generated", "genAI", "synthetic", "deepfake", "glitch",
+                    "skvip", "feik"]
 
 
 def extract_video_id(url: str) -> str:
