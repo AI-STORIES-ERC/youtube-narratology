@@ -203,7 +203,7 @@ def fetch_ai_comment_mentions(video_id: str, api_key: str) -> dict:
     }
 
 
-def fetch_metadata(video_id: str) -> dict:
+def fetch_metadata(video_id: str, scan_comments: bool = False) -> dict:
     """Fetch metadata for a given YouTube video ID.
 
     Attempts to use the YouTube Data API if an API key is set in the
@@ -281,13 +281,17 @@ def fetch_metadata(video_id: str) -> dict:
                                 metadata["channel_published_at"] = channel_snippet.get("publishedAt")
                                 metadata["channel_custom_url"] = channel_snippet.get("customUrl")
                                 metadata["channel_country"] = channel_snippet.get("country")
-                # Scan all top-level comments for AI-related words.
-                # Counts and matching comment text are saved.
-                metadata.update(fetch_ai_comment_mentions(video_id, api_key))
+                # Do not scan comments during ordinary URL fetches.
+                # Scanning all comments can take a long time and prevents the note form from loading.
+                # Use the backfill/discovery scripts for comment text analysis, or call
+                # fetch_metadata(video_id, scan_comments=True) explicitly.
+                if scan_comments:
+                    metadata.update(fetch_ai_comment_mentions(video_id, api_key))
 
                 return metadata
-        except Exception:
-            # Swallow exceptions from the API call and fall back to oEmbed
+        except Exception as e:
+            print("ERROR fetching YouTube API metadata:", e)
+            # Fall back to oEmbed
             pass
 
     # Fallback: use the oEmbed endpoint (no API key required)
