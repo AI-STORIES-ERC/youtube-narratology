@@ -1,0 +1,233 @@
+{% extends 'layout.html' %}
+
+{% block title %}YouTube Research Tool - Home{% endblock %}
+
+{% block content %}
+    <section class="input-section">
+        <h2>New Note</h2>
+        <form action="{{ url_for('fetch') }}" method="post" class="url-form">
+            <label for="url">YouTube URL</label>
+            <input type="url" id="url" name="url" placeholder="https://www.youtube.com/shorts/..." required>
+            <button type="submit">Fetch metadata</button>
+        </form>
+    </section>
+
+    {% if notes %}
+        <section class="stats-section">
+            <h2>Dataset Summary</h2>
+            <div class="stats-grid">
+                <div><strong>Total coded shorts:</strong> {{ total_coded }}</div>
+                <div><strong>Definite AI:</strong> {{ definite_ai_count }}</div>
+                <div><strong>Proportion definite AI:</strong> {{ definite_ai_percent }}%</div>
+                <div><strong>Masterplots coded:</strong> {{ total_masterplots_coded }}</div>
+            </div>
+        </section>
+
+        <section class="masterplot-summary">
+            <h3>Masterplots ({{ total_masterplots_coded }} coded)</h3>
+            {% if masterplot_counts %}
+                <div class="masterplot-chart-wrap">
+                    <canvas id="masterplotChart"></canvas>
+                </div>
+                <div class="masterplot-list">
+                    {% for plot, count in masterplot_counts.items() %}
+                        <div>{{ plot }}: {{ count }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="chart-section">
+            <h3>Channel countries</h3>
+            <div class="chart-wrap">
+                <canvas id="countryChart"></canvas>
+            </div>
+
+            <h3>Tags</h3>
+            <div class="tag-cloud">
+                {% for tag, count in tag_counts.items() %}
+                    <span class="tag-cloud-item" style="font-size: {{ 0.8 + count * 0.15 }}rem;">
+                {{ tag }} <small>{{ count }}</small>
+            </span>
+                {% endfor %}
+            </div>
+
+            <h3>Audio features</h3>
+            <div class="chart-wrap">
+                <canvas id="audioChart"></canvas>
+            </div>
+        </section>
+
+        <section class="notes-section">
+            <h2>Saved Notes</h2>
+
+            <table class="notes-table sortable-table" id="notesTable">
+                <thead>
+                <tr>
+                    <th>Thumb</th>
+                    <th onclick="sortTable(1)">Title</th>
+                    <th onclick="sortTable(2)">Uploaded</th>
+                    <th onclick="sortTable(3)">Type</th>
+                    <th onclick="sortTable(4)">AI</th>
+                    <th onclick="sortTable(5)">Masterplot</th>
+                    <th onclick="sortTable(6)">Views</th>
+                    <th onclick="sortTable(7)">Total comments</th>
+                    <th onclick="sortTable(8)">AI comments / total comments</th>
+                    <th onclick="sortTable(9)">Summary / Notes</th>
+                    <th onclick="sortTable(10)">AI comment text</th>
+                    <th onclick="sortTable(11)">Channel</th>
+                    <th onclick="sortTable(12)">Subscribers</th>
+                    <th onclick="sortTable(13)">Channel videos</th>
+                    <th onclick="sortTable(14)">Channel views</th>
+                    <th onclick="sortTable(15)">Date coded</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for note in notes %}
+                    <tr>
+                        <td>{% if note.thumbnail_url %}
+                            <img src="{{ note.thumbnail_url }}" alt="Thumbnail" class="table-thumbnail">{% endif %}</td>
+                        <td>{% if note.url %}
+                            <a href="{{ note.url }}" target="_blank">{{ note.title or "Untitled" }}</a>{% else %}
+                            {{ note.title or "Untitled" }}{% endif %}</td>
+                        <td data-sort="{{ note.upload_date or '' }}">
+                            {% if note.upload_date %}{{ note.upload_date[:10] }}{% endif %}</td>
+                        <td>{{ note.content_type }}</td>
+                        <td>{{ note.ai_confidence }}</td>
+                        <td>{{ note.masterplot }}</td>
+                        <td data-sort="{{ note.views or 0 }}">{{ note.views }}</td>
+                        <td data-sort="{{ note.comments or 0 }}">{{ note.comments }}</td>
+                        <td data-sort="{{ note.comments_ai_mentions or 0 }}">
+                            {{ note.comments_ai_mentions or 0 }} / {{ note.comments or 0 }}
+                        </td>
+                        <td>{% if note.summary %}<strong>Summary:</strong> {{ note.summary }}<br>{% endif %}
+                            {% if note.notes %}<strong>Notes:</strong> {{ note.notes }}{% endif %}</td>
+                        <td class="ai-comment-texts">
+                            {% if note.ai_comment_texts %}
+                                {% for comment in note.ai_comment_texts %}
+                                    <div class="ai-comment">
+                                        <span class="matched-words">{{ comment.matched_words | join(", ") }}:</span>
+                                        {{ comment.text }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td>{{ note.channel }}</td>
+                        <td data-sort="{{ note.subscribers or 0 }}">{{ note.subscribers }}</td>
+                        <td data-sort="{{ note.channel_video_count or 0 }}">{{ note.channel_video_count }}</td>
+                        <td data-sort="{{ note.channel_view_count or 0 }}">{{ note.channel_view_count }}</td>
+                        <td>{{ note.timestamp[:10] if note.timestamp else "" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const masterplotLabels = {{ masterplot_counts.keys() | list | tojson }};
+            const masterplotData = {{ masterplot_counts.values() | list | tojson }};
+
+            const chartCanvas = document.getElementById("masterplotChart");
+            if (chartCanvas && masterplotData.length > 0) {
+                new Chart(chartCanvas, {
+                    type: "pie",
+                    data: {
+                        labels: masterplotLabels,
+                        datasets: [{data: masterplotData}]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {legend: {position: "right"}}
+                    }
+                });
+            }
+
+            let sortDirections = {};
+
+            function getCellValue(row, columnIndex) {
+                const cell = row.cells[columnIndex];
+                if (!cell) return "";
+                if (cell.dataset.sort !== undefined) return cell.dataset.sort.trim();
+                return cell.innerText.trim();
+            }
+
+            function sortTable(columnIndex) {
+                const table = document.getElementById("notesTable");
+                const tbody = table.tBodies[0];
+                const rows = Array.from(tbody.rows);
+
+                sortDirections[columnIndex] = sortDirections[columnIndex] === "asc" ? "desc" : "asc";
+                const direction = sortDirections[columnIndex];
+
+                rows.sort((a, b) => {
+                    const aValue = getCellValue(a, columnIndex);
+                    const bValue = getCellValue(b, columnIndex);
+
+                    const aNumber = parseFloat(String(aValue).replace(/,/g, ""));
+                    const bNumber = parseFloat(String(bValue).replace(/,/g, ""));
+
+                    const bothNumeric = aValue !== "" && bValue !== "" && !isNaN(aNumber) && !isNaN(bNumber);
+
+                    if (bothNumeric) {
+                        return direction === "asc" ? aNumber - bNumber : bNumber - aNumber;
+                    }
+
+                    return direction === "asc"
+                        ? String(aValue).localeCompare(String(bValue))
+                        : String(bValue).localeCompare(String(aValue));
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            }
+
+            const countryLabels = {{ country_counts.keys() | list | tojson }};
+            const countryData = {{ country_counts.values() | list | tojson }};
+
+            const countryCanvas = document.getElementById("countryChart");
+            if (countryCanvas && countryData.length > 0) {
+                new Chart(countryCanvas, {
+                    type: "bar",
+                    data: {
+                        labels: countryLabels,
+                        datasets: [{
+                            label: "Videos",
+                            data: countryData
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {display: false}
+                        }
+                    }
+                });
+            }
+
+            const audioLabels = {{ audio_counts.keys() | list | tojson }};
+            const audioData = {{ audio_counts.values() | list | tojson }};
+
+            const audioCanvas = document.getElementById("audioChart");
+            if (audioCanvas && audioData.length > 0) {
+                new Chart(audioCanvas, {
+                    type: "bar",
+                    data: {
+                        labels: audioLabels,
+                        datasets: [{
+                            label: "Count",
+                            data: audioData
+                        }]
+                    },
+                    options: {
+                        indexAxis: "y",
+                        responsive: true,
+                        plugins: {
+                            legend: {display: false}
+                        }
+                    }
+                });
+            }
+        </script>
+    {% endif %}
+{% endblock %}

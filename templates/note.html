@@ -1,0 +1,168 @@
+{% extends 'layout.html' %}
+
+{% block title %}YouTube Research Tool - New Note{% endblock %}
+
+{% block content %}
+<section class="metadata-section">
+    <h2>Video Metadata</h2>
+    <div class="metadata-card">
+        {% if metadata.thumbnail_url %}
+        <img src="{{ metadata.thumbnail_url }}" alt="Thumbnail" class="thumbnail">
+        {% endif %}
+        <table class="metadata-table">
+            <tr><th>Title:</th><td>{{ metadata.title }}</td></tr>
+            <tr><th>Channel:</th><td>{{ metadata.channel }}</td></tr>
+            <tr><th>Upload date:</th><td>{{ metadata.upload_date }}</td></tr>
+            <tr><th>Duration:</th><td>{{ metadata.duration }}</td></tr>
+            <tr><th>Views:</th><td>{{ metadata.views }}</td></tr>
+            <tr><th>Likes:</th><td>{{ metadata.likes }}</td></tr>
+            <tr><th>Comments:</th><td>{{ metadata.comments }}</td></tr>
+            <tr><th>Comments scanned:</th><td>{{ metadata.comments_scanned }}</td></tr>
+            <tr><th>Comments mentioning AI words:</th><td>{{ metadata.comments_ai_mentions }}</td></tr>
+            <tr><th>Subscribers:</th><td>{{ metadata.subscribers }}</td></tr>
+            <tr><th>Channel videos:</th><td>{{ metadata.channel_video_count }}</td></tr>
+            <tr><th>Channel views:</th><td>{{ metadata.channel_view_count }}</td></tr>
+            <tr><th>Channel created:</th><td>{{ metadata.channel_published_at }}</td></tr>
+            <tr><th>Channel country:</th><td>{{ metadata.channel_country }}</td></tr>
+            <tr><th>Channel custom URL:</th><td>{{ metadata.channel_custom_url }}</td></tr>
+            <tr><th>Video description:</th><td class="long-metadata">{{ metadata.video_description }}</td></tr>
+            <tr><th>Channel description:</th><td class="long-metadata">{{ metadata.channel_description }}</td></tr>
+        </table>
+    </div>
+
+    <h3>Add Your Notes</h3>
+    <form action="{{ url_for('save') }}" method="post" class="note-form">
+        {% for key, value in metadata.items() %}
+            {% if key == "ai_comment_texts" %}
+                <input
+                type="hidden"
+                name="ai_comment_texts"
+                value='{{ value | tojson | safe }}'
+                >
+            {% else %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+
+        <label for="content_type">Content Type</label>
+        <select name="content_type" id="content_type">
+            <option value="">-- select --</option>
+            <option value="Story">Story</option>
+            <option value="ASMR">ASMR</option>
+            <option value="Ad">Ad</option>
+            <option value="Gameplay">Gameplay</option>
+            <option value="Summary">Gameplay</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="ai_confidence">AI Confidence</label>
+        <select name="ai_confidence" id="ai_confidence">
+            <option value="">-- select --</option>
+            <option value="Definite AI">Definite AI</option>
+            <option value="Probable AI">Probable AI</option>
+            <option value="Mixed">Mixed</option>
+            <option value="Human">Human</option>
+            <option value="Unclear">Unclear</option>
+        </select>
+
+        <label for="masterplot">Masterplot</label>
+        <select name="masterplot" id="masterplot">
+            <option value="">-- select --</option>
+            <option value="Revenge">Revenge</option>
+            <option value="Blessing in disguise">Blessing in disguise</option>
+            <option value="False accusation / vindication">False accusation / vindication</option>
+            <option value="Sacrifice for family">Sacrifice for family</option>
+            <option value="Hidden power">Hidden power</option>
+            <option value="Social shaming">Social shaming</option>
+            <option value="Moral epiphany">Moral epiphany</option>
+            <option value="Trickster reversal">Trickster reversal</option>
+            <option value="Challenge successful">Challenge successful</option>
+            <option value="Recovery / lost-and-found">Recovery / lost-and-found</option>
+            <option value="Bizarre moral exemplum">Bizarre moral exemplum</option>
+            <option value="Unexpected hero">Unexpected hero</option>
+            <option value="Protagonist gives beggar lifechanging gift">Protagonist gives beggar lifechanging gift</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="summary">Story Summary</label>
+        <textarea name="summary" id="summary" rows="3" placeholder="Brief summary"></textarea>
+
+        <label for="visuals">Visuals</label>
+        <textarea name="visuals" id="visuals" rows="2" placeholder="Describe the visuals"></textarea>
+
+        <fieldset>
+            <legend>Audio (check all that apply)</legend>
+            <div><input type="checkbox" id="audio_voiceover" name="audio_features" value="Voice-over"> <label for="audio_voiceover">Voice-over</label></div>
+            <div><input type="checkbox" id="audio_music_gentle" name="audio_features" value="Music – gentle"> <label for="audio_music_gentle">Music – gentle</label></div>
+            <div><input type="checkbox" id="audio_music_intense" name="audio_features" value="Music – intense"> <label for="audio_music_intense">Music – intense</label></div>
+            <div><input type="checkbox" id="audio_diegetic" name="audio_features" value="Diegetic sound"> <label for="audio_diegetic">Diegetic sound</label></div>
+            <div><input type="checkbox" id="audio_dialogue" name="audio_features" value="Dialogue"> <label for="audio_dialogue">Dialogue</label></div>
+            <div><input type="checkbox" id="audio_sound_effects" name="audio_features" value="Sound effects"> <label for="audio_sound_effects">Sound effects</label></div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Rhetorical Situation</legend>
+            <div><input type="checkbox" id="first_person_narrator" name="first_person_narrator" value="Yes"> <label for="first_person_narrator">First-person narrator</label></div>
+            <div><input type="checkbox" id="direct_address" name="direct_address" value="Yes"> <label for="direct_address">Direct address to viewer</label></div>
+            <label for="implied_purpose">Implied purpose</label>
+            <input type="text" name="implied_purpose" id="implied_purpose" placeholder="e.g. warning, confession, moral instruction">
+
+            <label for="reliability">Narrative stance / reliability</label>
+            <select name="reliability" id="reliability">
+                <option value="">-- select --</option>
+                <option value="Credible">Credible</option>
+                <option value="Slightly exaggerated">Slightly exaggerated</option>
+                <option value="Highly exaggerated">Highly exaggerated</option>
+                <option value="Obviously fabricated">Obviously fabricated</option>
+                <option value="Unclear">Unclear</option>
+            </select>
+
+            <label for="temporal_stance">Temporal stance</label>
+            <select name="temporal_stance" id="temporal_stance">
+                <option value="">-- select --</option>
+                <option value="Immediate / present-tense unfolding">Immediate / present-tense unfolding</option>
+                <option value="Retrospective testimony">Retrospective testimony</option>
+                <option value="Mythic / timeless">Mythic / timeless</option>
+                <option value="Reconstructed scene">Reconstructed scene</option>
+                <option value="Unclear">Unclear</option>
+            </select>
+
+            <label for="image_narration_alignment">Image/narration alignment</label>
+            <select name="image_narration_alignment" id="image_narration_alignment">
+                <option value="">-- select --</option>
+                <option value="Directly aligned">Directly aligned</option>
+                <option value="Loosely related">Loosely related</option>
+                <option value="Mostly unrelated">Mostly unrelated</option>
+                <option value="Completely unrelated">Completely unrelated</option>
+                <option value="Unclear">Unclear</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+            <legend>AI Markers (check all that apply)</legend>
+            <div><input type="checkbox" id="marker_synthetic_voice" name="ai_markers" value="Synthetic voice"> <label for="marker_synthetic_voice">Synthetic voice</label></div>
+            <div><input type="checkbox" id="marker_childlike_voice" name="ai_markers" value="Childlike voice"> <label for="marker_childlike_voice">Childlike voice</label></div>
+            <div><input type="checkbox" id="marker_no_character_depth" name="ai_markers" value="No character depth"> <label for="marker_no_character_depth">No character depth</label></div>
+            <div><input type="checkbox" id="marker_strange_moral" name="ai_markers" value="Strange moral"> <label for="marker_strange_moral">Strange moral</label></div>
+            <div><input type="checkbox" id="marker_unrealistic_escalation" name="ai_markers" value="Unrealistic escalation"> <label for="marker_unrealistic_escalation">Unrealistic escalation</label></div>
+             <div><input type="checkbox" id="marker_unrealistic_escalation" name="ai_markers" value="Unrealistic escalation"> <label for="marker_unrealistic_escalation">Lack of conflict</label></div>
+            <div><input type="checkbox" id="marker_abrupt_ending" name="ai_markers" value="Abrupt ending"> <label for="marker_abrupt_ending">Abrupt ending</label></div>
+            <div><input type="checkbox" id="marker_unrelated_footage" name="ai_markers" value="Unrelated footage"> <label for="marker_unrelated_footage">Unrelated footage</label></div>
+            <div><input type="checkbox" id="marker_asmr" name="ai_markers" value="ASMR visuals"> <label for="marker_asmr_factory">ASMR factory content</label></div>
+            <div><input type="checkbox" id="marker_ai_images" name="ai_markers" value="Obvious AI images"> <label for="marker_ai_images">Obvious AI images</label></div>
+            <div><input type="checkbox" id="marker_stock_footage" name="ai_markers" value="Stock footage"> <label for="marker_stock_footage">Stock footage</label></div>
+        </fieldset>
+
+        <label for="tags">Tags</label>
+        <input type="text" name="tags" id="tags" placeholder="#family, #eating">
+
+        <label for="notes">Additional Notes / Observations</label>
+        <textarea name="notes" id="notes" rows="5" placeholder="Additional observations"></textarea>
+
+        <div class="form-buttons">
+            <button type="submit">Save note</button>
+            <a href="{{ url_for('index') }}" class="cancel-link">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
