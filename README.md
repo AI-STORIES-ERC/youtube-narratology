@@ -1,7 +1,8 @@
 # YouTube Narratology - a tool for qualitative-quantitative analysis of YouTube shorts
 
-Author: Jill Walker Rettberg / jill.walker.rettberg@uib.no
-ORCID: https://orcid.org/0000-0003-2472-3812
+- Author: Jill Walker Rettberg
+- Email: jill.walker.rettberg@uib.no
+- ORCID: https://orcid.org/0000-0003-2472-3812
 
 ## Description
 This repository contains code to support qualitative narratological analysis of YouTube shorts and to gather metadata from YouTube to support the analysis, and preliminary data from the analysis. This is a work-in-progress and the annotation system is being developed iteratively as I annotate videos and see which features are most relevant to answer my research questions. This is a small subproject in a larger research project, [AI STORIES: Narrative Archetypes for Artificial Intelligence](https://www4.uib.no/en/research/research-projects/ai-stories). See the [project website](https://www4.uib.no/en/research/research-projects/ai-stories) for more information and a list of other publications and datasets from the project so far.
