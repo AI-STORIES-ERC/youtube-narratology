@@ -450,7 +450,7 @@ def fetch():
     if not video_id:
         flash("Could not extract a video ID from that URL.", "error")
         return redirect(url_for("index"))
-    metadata = fetch_metadata(video_id)
+    metadata = fetch_metadata(video_id, scan_comments=True)
     # Prepopulate the metadata dictionary with empty strings for missing
     # optional fields to simplify template rendering
     defaults = {
