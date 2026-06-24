@@ -324,10 +324,13 @@ def note_needs_backfill(note: dict, force_comments: bool = False) -> bool:
     ]
 
     if force_comments:
-        return (
-            note.get("id")
-            and int(note.get("comments_ai_mentions") or 0) > 0
-            and not note.get("ai_comment_texts")
+        return note.get("id") and (
+                not note.get("comments_scanned")
+                or note.get("comments_ai_mentions") in ("", None)
+                or (
+                        int(note.get("comments_ai_mentions") or 0) > 0
+                        and not note.get("ai_comment_texts")
+                )
         )
 
     return any(not note.get(field) for field in fields_to_check)
