@@ -19,7 +19,7 @@ This repository contains code to support qualitative narratological analysis of 
 ## Use of LLMs
 I used ChatGPT to help write the code. It often suggested analysis categories, which I usually ignored or at least altered. This README file is partially written using ChatGPT because I figure it's good at structured details like this. I have read and edited the AI-generated bits of the README and have written several parts myself, including this section, the "How to use" section, and the "Research goals".
 
-The full chat where I used ChatGPT to develop the code can be viewed here: https://chatgpt.com/share/6a3ace75-9c20-83ed-a257-541e93d0d590 and before publication I will export the full text of the chat and include it with other documentation.
+The full chat where I used ChatGPT to develop the code can be viewed here: https://chatgpt.com/share/6a3ae284-61ec-83eb-8759-e547b9b80ddc and before publication I will export the full text of the chat and include it with other documentation.
 
 AI is only used to generate code. No AI is used to generate data or notes. 
 
