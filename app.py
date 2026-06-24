@@ -1,5 +1,5 @@
 """
-YouTube Research Tool
+YouTube  - narrative analysis tools
 ----------------------
 
 This Flask application runs on your local machine and provides a simple web
