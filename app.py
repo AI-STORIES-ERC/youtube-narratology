@@ -54,7 +54,7 @@ MAX_BACKUPS = 80
 # Scan all top-level comments by paging through YouTube's API.
 # YouTube allows maxResults=100 per request; that is the page size, not a total limit.
 AI_COMMENT_WORDS = ["ai", "clanker", "slop", "chatgpt", "bot",
-                    "ki", "skvip", "feik", "bott",
+                    "skvip", "feik",
                     "openai", "claude", "anthropic", "sora", "nanobanana",
                     "scripted", "fake",
                     ]
