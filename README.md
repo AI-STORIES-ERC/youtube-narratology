@@ -42,7 +42,7 @@ Each entry includes:
 - channel metadata
 - human-coded qualitative annotations
 
-The text of comments containing AI-related words is not initially included but can be added using the script `backfill_youtube_metadata_with_comment_text.py`.
+The text of comments containing AI-related words is not initially included but can be added using the script `backfill_youtube_metadata_with_comment_text.py`. (Note: only top-level comments are scanned, not replies to comments, so the number of comments scanned will be lower than the total number of comments.)
 
 ## How to use
 1. Fork the repository and clone it to your own computer. You have to have the files on your computer to use the local webpage, and you'll probably want to tweak the code to make it do what you want it to do.
